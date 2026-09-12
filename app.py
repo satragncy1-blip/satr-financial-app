@@ -16,7 +16,7 @@ st.set_page_config(page_title="SATR Enterprise Financial System", layout="wide")
 # ---------------------------------------------------------
 TARGET_EMAIL = "satragncy.1@gmail.com"
 SENDER_EMAIL = "satragncy.1@gmail.com"
-APP_PASSWORD = ""  # ضع هنا كلمة سر التطبيقات من Gmail لتفعيل الإشعارات
+APP_PASSWORD = ""  # ضع هنا App Password من Gmail إذا أردت تفعيل الإشعارات
 
 def send_email_async(subject, body):
     if not APP_PASSWORD:
@@ -80,8 +80,11 @@ if "emp_lists" not in st.session_state:
 if "logged_in" not in st.session_state:
     st.session_state["logged_in"] = False
 
+if "user_info" not in st.session_state:
+    st.session_state["user_info"] = None
+
 # ---------------------------------------------------------
-# 3. Authentication UI
+# 3. Application Flow Logic
 # ---------------------------------------------------------
 if not st.session_state["logged_in"]:
     st.title("🔒 SATR Agency - Login")
@@ -100,7 +103,7 @@ if not st.session_state["logged_in"]:
         else:
             st.error("اسم المستخدم أو كلمة السر غير صحيحة")
 else:
-    # Sidebar: المستخدمين وتعديل قائمة الموظفين
+    # القائمة الجانبية تعمل فقط بعد التأكد من تسجيل الدخول
     st.sidebar.write(f"👤 مرحباً بك: **{st.session_state['user_info']['name']}**")
     
     st.sidebar.markdown("---")
@@ -115,6 +118,7 @@ else:
 
     if st.sidebar.button("تسجيل الخروج"):
         st.session_state["logged_in"] = False
+        st.session_state["user_info"] = None
         st.rerun()
 
     # ---------------------------------------------------------
@@ -164,7 +168,7 @@ else:
                 mb_pct = st.number_input("نسبة الميديا باير %", value=10.0)
                 mb_val = total_budget * (mb_pct / 100.0)
 
-        # الحسابات الماليّة
+        # الحسابات المالية
         cost_gd = gd_qty * gd_price if gd_emp != "لا يوجد" else 0.0
         cost_ed = ed_qty * ed_price if ed_emp != "لا يوجد" else 0.0
         cost_cw = cw_qty * cw_price if cw_emp != "لا يوجد" else 0.0
