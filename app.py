@@ -58,7 +58,7 @@ def get_gspread_client():
     return gspread.authorize(credentials)
 
 # ---------------------------------------------------------
-# 2. State & Database Initialization
+# 2. State Initialization
 # ---------------------------------------------------------
 USERS = {
     "Allam@satr": {"name": "علام Admin", "pass": "mohandm2005", "role": "admin"},
@@ -80,11 +80,11 @@ if "emp_lists" not in st.session_state:
 if "logged_in" not in st.session_state:
     st.session_state["logged_in"] = False
 
-if "user_info" not in st.session_state:
-    st.session_state["user_info"] = None
+if "current_user_name" not in st.session_state:
+    st.session_state["current_user_name"] = ""
 
 # ---------------------------------------------------------
-# 3. Application Flow Logic
+# 3. Main Logic Flow
 # ---------------------------------------------------------
 if not st.session_state["logged_in"]:
     st.title("🔒 SATR Agency - Login")
@@ -94,7 +94,7 @@ if not st.session_state["logged_in"]:
     if st.button("تسجيل الدخول", type="primary"):
         if u in USERS and USERS[u]["pass"] == p:
             st.session_state["logged_in"] = True
-            st.session_state["user_info"] = USERS[u]
+            st.session_state["current_user_name"] = USERS[u]["name"]
             send_email_async(
                 f"تسجيل دخول: {USERS[u]['name']}", 
                 f"قام المستخدم <b>{USERS[u]['name']}</b> بتسجيل الدخول للنظام المالي."
@@ -103,8 +103,8 @@ if not st.session_state["logged_in"]:
         else:
             st.error("اسم المستخدم أو كلمة السر غير صحيحة")
 else:
-    # القائمة الجانبية تعمل فقط بعد التأكد من تسجيل الدخول
-    st.sidebar.write(f"👤 مرحباً بك: **{st.session_state['user_info']['name']}**")
+    # القائمة الجانبية (تعمل فقط إذا تم تسجل الدخول بنجاح)
+    st.sidebar.write(f"👤 مرحباً بك: **{st.session_state['current_user_name']}**")
     
     st.sidebar.markdown("---")
     st.sidebar.subheader("➕ إضافة موظف جديد")
@@ -118,7 +118,7 @@ else:
 
     if st.sidebar.button("تسجيل الخروج"):
         st.session_state["logged_in"] = False
-        st.session_state["user_info"] = None
+        st.session_state["current_user_name"] = ""
         st.rerun()
 
     # ---------------------------------------------------------
@@ -200,7 +200,7 @@ else:
                 
                 ws.append_row([
                     inv_id, created_at, client_name, total_budget, 
-                    total_expenses, net_profit, st.session_state['user_info']['name']
+                    total_expenses, net_profit, st.session_state['current_user_name']
                 ])
                 
                 send_email_async(
